@@ -36,7 +36,7 @@ namespace sistema_vendas
 
         private static void RealizarVendas()
         {
-            throw new NotImplementedException();
+            
         }
 
         private static void CadastrarProdutos()
@@ -44,16 +44,27 @@ namespace sistema_vendas
             string[] produtos, temp;
             string op1;
             int cod;
+            //Verifica se o arquivo existe
             if(!File.Exists("Produtos.csv"))
             {
                 File.Create("Produtos.csv").Close();
+                StreamWriter sw = new StreamWriter("Produtos.csv",true);
+                sw.Write("0;DescProdutos");
+                sw.Close();
             }
+            //Inicio do Cadastro
             do
             {
                 cod = 0;
                 produtos = File.ReadAllLines("Produtos.csv");
-                temp = produtos[produtos.Length-1].Split(';');
+                //Leitura do código da última linha
+                if(produtos.Length==0)
+                {
+                    temp = produtos[produtos.Length].Split(';');
+                }else
+                    temp = produtos[produtos.Length-1].Split(';');
                 cod = int.Parse(temp[0])+1;
+                //Inicio da escrita em arquivo
                 StreamWriter sw = new StreamWriter("Produtos.csv",true);
                 sw.WriteLine();
                 Console.WriteLine("\n### Cadastro de Produtos ###\n\nCód.Produto = "+cod);
