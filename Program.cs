@@ -115,9 +115,13 @@ namespace sistema_vendas
                     Console.WriteLine("\nCliente Encontrado");
                     Console.WriteLine("\nNome: "+findcliente[1]+"\nCPF: "+findcliente[0]+"\neMail: "+findcliente[2]+"\nDesde: "+findcliente[3]);
                     Console.WriteLine("\nLista de Produtos");
+                    int cont=0;
                     foreach(string produto in produtos){
                         findproduto = produto.Split(';');
-                        Console.WriteLine(findproduto[0]+" - "+findproduto[1]);
+                        if(cont!=0){
+                            Console.WriteLine(findproduto[0]+" - "+findproduto[1]);
+                        }
+                        cont=1;
                     }
                     do{
                         Console.Write("Digite o Código do Produto: ");
