@@ -5,6 +5,10 @@ namespace sistema_vendas
 {
     class Program
     {
+        static int[] chaveCPF = {10,9,8,7,6,5,4,3,2};
+        static int[] chaveCPF2 = {11,10,9,8,7,6,5,4,3,2};
+        static int[] chaveCNPJ = {5,4,3,2,9,8,7,6,5,4,3,2};
+        static int[] chaveCNPJ2 = {6,5,4,3,2,9,8,7,6,5,4,3,2};
         static void Main(string[] args)
         {
             string op2;
@@ -36,8 +40,121 @@ namespace sistema_vendas
 
         private static void RealizarVendas()
         {
+            int valid=0,valid2,valid3=0;
+            string docCliente,codProduto;
+            string[] clientes,produtos,findcliente=null,findproduto=null;
+            clientes = File.ReadAllLines("cliente.csv");
+            produtos = File.ReadAllLines("Produtos.csv");
+            if(!File.Exists("Vendas.csv"))
+            {
+                File.Create("Vendas.csv").Close();
+            }
+            StreamWriter sw = new StreamWriter("Vendas.csv",true);
+            do{
+                do{
+                    Console.Write("Digite o documento do Cliente: ");
+                    docCliente = Console.ReadLine();     
+                }while(docCliente.Length!=11 && docCliente.Length!=14);
+                if(docCliente.Length==11){
+                    valid = ValidarDocumento(docCliente,1);
+                }else
+                    valid = ValidarDocumento(docCliente,2);     
+            }while(valid == 0);
+            valid2=0;
+            foreach(string cliente in clientes){
+                if(cliente.Contains(docCliente)){
+                    findcliente = cliente.Split(';');
+                    valid2 = 1;
+                }
+            }
+            if(valid2==1){
+                Console.WriteLine("\nCliente Encontrado");
+                Console.WriteLine("\nNome: "+findcliente[1]+"\nCPF: "+findcliente[0]+"\neMail: "+findcliente[3]+"\nDesde: "+findcliente[4]);
+                Console.WriteLine("\nLista de Produtos");
+                foreach(string produto in produtos){
+                    findproduto = produto.Split(';');
+                    Console.WriteLine(findproduto[0]+" - "+findproduto[1]);
+                }
+                do{
+                    Console.Write("Digite o Código do Produto: ");
+                    codProduto = Console.ReadLine();
+                    foreach(string produto in produtos){
+                        findproduto = produto.Split(';');
+                        if(findproduto[0].Equals(codProduto)){
+                            valid3 = 1;
+                        }
+                    }
+                }while(valid3!=1);
+                sw.WriteLine(docCliente+";"+codProduto);
+            }else{
+                Console.WriteLine("\nCliente não Encontrado");
+
+            }
             
         }
+
+        private static int ValidarDocumento(String docCliente, int tipoCliente)
+        {
+            int[] chaveCPF = {10,9,8,7,6,5,4,3,2};
+            int[] chaveCPF2 = {11,10,9,8,7,6,5,4,3,2};
+            int[] chaveCNPJ = {5,4,3,2,9,8,7,6,5,4,3,2};
+            int[] chaveCNPJ2 = {6,5,4,3,2,9,8,7,6,5,4,3,2};
+            int[] chave1;
+            int[] chave2;
+            string tipoDoc;
+            string primeiroDigito, segundoDigito;
+
+            if(tipoCliente==1){
+                tipoDoc = "CPF";
+                chave1  = chaveCPF;
+                chave2 = chaveCPF2;
+            }
+            else{
+                tipoDoc = "CNPJ";
+                chave1 = chaveCNPJ;
+                chave2 = chaveCNPJ;
+            }
+
+            primeiroDigito = ValidaDigito(docCliente,chave1,tipoCliente);
+
+            if (primeiroDigito != docCliente.Substring(chave1.Length,1))
+            {
+                Console.WriteLine(tipoDoc+" inválido!");
+            }
+            else
+            {
+                segundoDigito = ValidaDigito(docCliente,chave2,tipoCliente);
+
+            if (docCliente.EndsWith(segundoDigito) == true)
+            {
+                return 1;
+            }
+            else
+            {
+                Console.WriteLine(tipoDoc+" inválido!");
+            }
+         }
+        return 0;
+    }
+
+    private static string ValidaDigito(string doc, int[] chave, int tipoDoc)
+    {
+       int soma = 0, resto = 0;
+       string tempdoc;
+       tempdoc = doc.Substring(0,chave.Length);
+       for(int i=0;i<chave.Length;i++){
+                soma += Convert.ToInt16(tempdoc[i].ToString())*chave[i];
+        }
+            resto = soma % 11;
+            if(resto<2)
+            {
+                return "0";        
+            }
+            else
+            {
+                return (11-resto).ToString();
+            }
+    }
 
         private static void CadastrarProdutos()
         {
@@ -58,11 +175,7 @@ namespace sistema_vendas
                 cod = 0;
                 produtos = File.ReadAllLines("Produtos.csv");
                 //Leitura do código da última linha
-                if(produtos.Length==0)
-                {
-                    temp = produtos[produtos.Length].Split(';');
-                }else
-                    temp = produtos[produtos.Length-1].Split(';');
+                temp = produtos[produtos.Length-1].Split(';');
                 cod = int.Parse(temp[0])+1;
                 //Inicio da escrita em arquivo
                 StreamWriter sw = new StreamWriter("Produtos.csv",true);
@@ -82,7 +195,47 @@ namespace sistema_vendas
 
         private static void CadastrarClientes()
         {
-            throw new NotImplementedException();
+            string nomeCliente;
+            string emailCliente;
+            string tipoCliente;
+            string docCliente;
+            string op1;
+            int valid;
+            do{
+                StreamWriter writer = new StreamWriter("cliente.csv",true);
+                Console.WriteLine("\nCADASTRO DE CLIENTES: \n");
+                do{
+                    Console.Write("Digite 1 para CPF e 2 para CNPJ: ");
+                    tipoCliente = Console.ReadLine();
+                }while(tipoCliente!="1" && tipoCliente!="2");
+                do{
+                    if(tipoCliente=="1"){ 
+                        do{
+                            Console.Write("CPF: ");
+                            docCliente = Console.ReadLine();    
+                        }while(docCliente.Length!=11);
+                        valid = ValidarDocumento(docCliente, 1);
+                    }
+                    else{
+                        do{
+                            Console.Write("CNPJ: ");
+                            docCliente = Console.ReadLine();    
+                        }while(docCliente.Length!=14);
+                        valid = ValidarDocumento(docCliente, 2);
+                    }
+                }while(valid!=1);
+                Console.Write("Nome completo: ");
+                nomeCliente = Console.ReadLine();
+                Console.Write("Email: ");
+                emailCliente = Console.ReadLine();
+                writer.WriteLine(docCliente+";"+nomeCliente+";"+emailCliente+";"+System.DateTime.Now.ToString());
+                writer.Close();
+                do
+                {
+                    Console.Write("\nDeseja realizar um novo cadastro? (S ou N)");
+                    op1 = Console.ReadLine();
+                } while (op1!="S" && op1!="N" && op1!="s" && op1!="n");
+            } while(op1=="S" || op1=="s");
         }
     }
 }
