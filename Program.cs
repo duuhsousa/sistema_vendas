@@ -35,13 +35,55 @@ namespace sistema_vendas
 
         private static void ExtratoClientes()
         {
-            throw new NotImplementedException();
+            int valid=0,valid2,valid3=0;
+            string docCliente,codProduto;
+            string[] clientes,produtos,vendas,findcliente=null,findproduto=null,findvenda=null;
+            clientes = File.ReadAllLines("cliente.csv");
+            produtos = File.ReadAllLines("Produtos.csv");
+            vendas = File.ReadAllLines("Vendas.csv");
+            do{
+                do{
+                    Console.Write("Digite o documento do Cliente: ");
+                    docCliente = Console.ReadLine();     
+                }while(docCliente.Length!=11 && docCliente.Length!=14);
+                if(docCliente.Length==11){
+                    Console.WriteLine("Validando CPF...");
+                    valid = ValidarDocumento(docCliente,1);
+                }else{
+                    Console.WriteLine("Validando CNPJ...");
+                    valid = ValidarDocumento(docCliente,2);
+                } 
+                if(valid==0)
+                    Console.WriteLine("Documento Inválido!");        
+            }while(valid==0);
+            foreach(string cliente in clientes){
+                    if(cliente.Contains(docCliente)){
+                        findcliente = cliente.Split(';');
+                }
+            }
+            Console.WriteLine("\nCliente: "+findcliente[1]+"\neMail: "+findcliente[2]+"\nCPF: "+findcliente[0]+"\n");
+            foreach(string venda in vendas){
+                if(venda.Contains(docCliente)){
+                    findvenda = venda.Split(';');
+                    foreach(string cliente in clientes){
+                        if(cliente.Contains(findvenda[0])){
+                            findcliente = cliente.Split(';');
+                        }
+                    }
+                    foreach(string produto in produtos){
+                        if(produto.Contains(findvenda[1])){
+                            findproduto = produto.Split(';');
+                        }
+                    }
+                    Console.WriteLine(findvenda[2]+"            "+findproduto[1]);
+                }
+            }
         }
 
         private static void RealizarVendas()
         {
             int valid=0,valid2,valid3=0;
-            string docCliente,codProduto;
+            string docCliente,codProduto,op1;
             string[] clientes,produtos,findcliente=null,findproduto=null;
             clientes = File.ReadAllLines("cliente.csv");
             produtos = File.ReadAllLines("Produtos.csv");
@@ -49,48 +91,57 @@ namespace sistema_vendas
             {
                 File.Create("Vendas.csv").Close();
             }
-            StreamWriter sw = new StreamWriter("Vendas.csv",true);
             do{
+                StreamWriter sw = new StreamWriter("Vendas.csv",true);
                 do{
-                    Console.Write("Digite o documento do Cliente: ");
-                    docCliente = Console.ReadLine();     
-                }while(docCliente.Length!=11 && docCliente.Length!=14);
-                if(docCliente.Length==11){
-                    valid = ValidarDocumento(docCliente,1);
-                }else
-                    valid = ValidarDocumento(docCliente,2);     
-            }while(valid == 0);
-            valid2=0;
-            foreach(string cliente in clientes){
-                if(cliente.Contains(docCliente)){
-                    findcliente = cliente.Split(';');
-                    valid2 = 1;
+                    do{
+                        Console.Write("Digite o documento do Cliente: ");
+                        docCliente = Console.ReadLine();     
+                    }while(docCliente.Length!=11 && docCliente.Length!=14);
+                    if(docCliente.Length==11){
+                        valid = ValidarDocumento(docCliente,1);
+                    }else
+                        valid = ValidarDocumento(docCliente,2);     
+                }while(valid == 0);
+                valid2=0;
+                foreach(string cliente in clientes){
+                    if(cliente.Contains(docCliente)){
+                        findcliente = cliente.Split(';');
+                        valid2 = 1;
+                    }
                 }
-            }
-            if(valid2==1){
-                Console.WriteLine("\nCliente Encontrado");
-                Console.WriteLine("\nNome: "+findcliente[1]+"\nCPF: "+findcliente[0]+"\neMail: "+findcliente[3]+"\nDesde: "+findcliente[4]);
-                Console.WriteLine("\nLista de Produtos");
-                foreach(string produto in produtos){
-                    findproduto = produto.Split(';');
-                    Console.WriteLine(findproduto[0]+" - "+findproduto[1]);
-                }
-                do{
-                    Console.Write("Digite o Código do Produto: ");
-                    codProduto = Console.ReadLine();
+                
+                if(valid2==1){
+                    Console.WriteLine("\nCliente Encontrado");
+                    Console.WriteLine("\nNome: "+findcliente[1]+"\nCPF: "+findcliente[0]+"\neMail: "+findcliente[2]+"\nDesde: "+findcliente[3]);
+                    Console.WriteLine("\nLista de Produtos");
                     foreach(string produto in produtos){
                         findproduto = produto.Split(';');
-                        if(findproduto[0].Equals(codProduto)){
-                            valid3 = 1;
-                        }
+                        Console.WriteLine(findproduto[0]+" - "+findproduto[1]);
                     }
-                }while(valid3!=1);
-                sw.WriteLine(docCliente+";"+codProduto);
-            }else{
-                Console.WriteLine("\nCliente não Encontrado");
+                    do{
+                        Console.Write("Digite o Código do Produto: ");
+                        codProduto = Console.ReadLine();
+                        foreach(string produto in produtos){
+                            findproduto = produto.Split(';');
+                            if(findproduto[0].Equals(codProduto)){
+                                valid3 = 1;
+                            }
+                        }
+                    }while(valid3!=1);
+                    sw.WriteLine(docCliente+";"+codProduto+";"+System.DateTime.Now.ToString());
+                    sw.Close();
+                    Console.WriteLine("Venda Realizada!");
+                }else{
+                    Console.WriteLine("\nCliente não Encontrado");
 
-            }
-            
+                }
+                do
+                {
+                    Console.Write("\nDeseja realizar uma outra venda? (S ou N)");
+                    op1 = Console.ReadLine();
+                } while (op1!="S" && op1!="N" && op1!="s" && op1!="n");
+            } while(op1=="S" || op1=="s");
         }
 
         private static int ValidarDocumento(String docCliente, int tipoCliente)
@@ -106,17 +157,16 @@ namespace sistema_vendas
 
             if(tipoCliente==1){
                 tipoDoc = "CPF";
-                chave1  = chaveCPF;
+                chave1 = chaveCPF;
                 chave2 = chaveCPF2;
             }
             else{
                 tipoDoc = "CNPJ";
                 chave1 = chaveCNPJ;
-                chave2 = chaveCNPJ;
+                chave2 = chaveCNPJ2;
             }
 
             primeiroDigito = ValidaDigito(docCliente,chave1,tipoCliente);
-
             if (primeiroDigito != docCliente.Substring(chave1.Length,1))
             {
                 Console.WriteLine(tipoDoc+" inválido!");
@@ -135,7 +185,7 @@ namespace sistema_vendas
             }
          }
         return 0;
-    }
+        }
 
     private static string ValidaDigito(string doc, int[] chave, int tipoDoc)
     {
@@ -228,7 +278,7 @@ namespace sistema_vendas
                 nomeCliente = Console.ReadLine();
                 Console.Write("Email: ");
                 emailCliente = Console.ReadLine();
-                writer.WriteLine(docCliente+";"+nomeCliente+";"+emailCliente+";"+System.DateTime.Now.ToString());
+                writer.WriteLine(docCliente+";"+nomeCliente+";"+emailCliente+";"+System.DateTime.Now.ToString()+";");
                 writer.Close();
                 do
                 {
