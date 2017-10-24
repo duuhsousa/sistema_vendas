@@ -161,16 +161,17 @@ namespace sistema_vendas
 
             if(tipoCliente==1){
                 tipoDoc = "CPF";
-                chave1 = chaveCPF;
+                chave1  = chaveCPF;
                 chave2 = chaveCPF2;
             }
             else{
                 tipoDoc = "CNPJ";
                 chave1 = chaveCNPJ;
-                chave2 = chaveCNPJ2;
+                chave2 = chaveCNPJ;
             }
 
             primeiroDigito = ValidaDigito(docCliente,chave1,tipoCliente);
+
             if (primeiroDigito != docCliente.Substring(chave1.Length,1))
             {
                 Console.WriteLine(tipoDoc+" inválido!");
@@ -187,12 +188,12 @@ namespace sistema_vendas
             {
                 Console.WriteLine(tipoDoc+" inválido!");
             }
-         }
+            }
         return 0;
         }
 
-    private static string ValidaDigito(string doc, int[] chave, int tipoDoc)
-    {
+        private static string ValidaDigito(string doc, int[] chave, int tipoDoc)
+        {
        int soma = 0, resto = 0;
        string tempdoc;
        tempdoc = doc.Substring(0,chave.Length);
@@ -200,14 +201,20 @@ namespace sistema_vendas
                 soma += Convert.ToInt16(tempdoc[i].ToString())*chave[i];
         }
             resto = soma % 11;
+            
             if(resto<2)
             {
                 return "0";        
             }
             else
             {
+                /*if(resto==10 && tipoDoc==1){
+                    return "0";
+                }*/
+                
                 return (11-resto).ToString();
             }
+
     }
 
         private static void CadastrarProdutos()
@@ -254,9 +261,9 @@ namespace sistema_vendas
             string tipoCliente;
             string docCliente;
             string op1;
-            int valid;
+            int valid = 0;
+            int duplicado;
             do{
-                StreamWriter writer = new StreamWriter("cliente.csv",true);
                 Console.WriteLine("\nCADASTRO DE CLIENTES: \n");
                 do{
                     Console.Write("Digite 1 para CPF e 2 para CNPJ: ");
@@ -266,18 +273,24 @@ namespace sistema_vendas
                     if(tipoCliente=="1"){ 
                         do{
                             Console.Write("CPF: ");
-                            docCliente = Console.ReadLine();    
-                        }while(docCliente.Length!=11);
+                            docCliente = Console.ReadLine();
+                            duplicado = PesquisaDocumento(docCliente);    
+                        }while(docCliente.Length!=11 || duplicado!=0);
+                        Console.WriteLine(docCliente);
                         valid = ValidarDocumento(docCliente, 1);
+                        Console.WriteLine(valid);
                     }
                     else{
                         do{
                             Console.Write("CNPJ: ");
                             docCliente = Console.ReadLine();    
-                        }while(docCliente.Length!=14);
+                            duplicado = PesquisaDocumento(docCliente);    
+                        }while(docCliente.Length!=11 || duplicado!=0);
                         valid = ValidarDocumento(docCliente, 2);
                     }
                 }while(valid!=1);
+
+                StreamWriter writer = new StreamWriter("cliente.csv",true);
                 Console.Write("Nome completo: ");
                 nomeCliente = Console.ReadLine();
                 Console.Write("Email: ");
@@ -290,6 +303,23 @@ namespace sistema_vendas
                     op1 = Console.ReadLine();
                 } while (op1!="S" && op1!="N" && op1!="s" && op1!="n");
             } while(op1=="S" || op1=="s");
+        }
+
+        private static int PesquisaDocumento(string docCliente)
+        {
+            if(File.Exists("cliente.csv")){
+                String[] clientes = File.ReadAllLines("cliente.csv");
+                String[] dadosCliente;
+
+                foreach(string cliente in clientes){
+                    dadosCliente = cliente.Split(';');
+                    if(dadosCliente[0].Equals(docCliente)){
+                        Console.WriteLine("\nCliente já cadastrado no sistema!\n");
+                        return 1;
+                    }
+                }
+            }
+            return 0;
         }
     }
 }
