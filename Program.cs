@@ -123,19 +123,28 @@ namespace sistema_vendas
                         }
                         cont=1;
                     }
-                    do{
-                        Console.Write("Digite o Código do Produto: ");
-                        codProduto = Console.ReadLine();
-                        foreach(string produto in produtos){
-                            findproduto = produto.Split(';');
-                            if(findproduto[0].Equals(codProduto)){
-                                valid3 = 1;
-                            }
-                        }
-                    }while(valid3!=1);
-                    sw.WriteLine(docCliente+";"+codProduto+";"+System.DateTime.Now.ToString());
                     sw.Close();
-                    Console.WriteLine("Venda Realizada!");
+                    do{
+                        sw = new StreamWriter("Vendas.csv",true);
+                        do{
+                            Console.Write("Digite o Código do Produto: ");
+                            codProduto = Console.ReadLine();
+                            foreach(string produto in produtos){
+                                findproduto = produto.Split(';');
+                                if(findproduto[0].Equals(codProduto)){
+                                    valid3 = 1;
+                                }
+                            }
+                        }while(valid3!=1);
+                        sw.WriteLine(docCliente+";"+codProduto+";"+System.DateTime.Now.ToString());
+                        sw.Close();
+                        Console.WriteLine("Venda Realizada!");
+                        do
+                        {
+                            Console.Write("\nDeseja realizar uma outra venda para "+findcliente[1]+"? (S ou N)");
+                            op1 = Console.ReadLine();
+                        } while (op1!="S" && op1!="N" && op1!="s" && op1!="n");
+                    }while(op1=="S" || op1=="s");
                 }else{
                     Console.WriteLine("\nCliente não Encontrado");
 
