@@ -5,10 +5,6 @@ namespace sistema_vendas
 {
     class Program
     {
-        static int[] chaveCPF = {10,9,8,7,6,5,4,3,2};
-        static int[] chaveCPF2 = {11,10,9,8,7,6,5,4,3,2};
-        static int[] chaveCNPJ = {5,4,3,2,9,8,7,6,5,4,3,2};
-        static int[] chaveCNPJ2 = {6,5,4,3,2,9,8,7,6,5,4,3,2};
         static void Main(string[] args)
         {
             string op2;
@@ -168,6 +164,15 @@ namespace sistema_vendas
             string tipoDoc;
             string primeiroDigito, segundoDigito;
 
+            if(docCliente=="00000000000" || docCliente=="11111111111" || docCliente=="22222222222"
+            || docCliente=="33333333333" || docCliente=="44444444444" || docCliente=="55555555555"
+            || docCliente=="66666666666" || docCliente=="77777777777" || docCliente=="88888888888"
+            || docCliente=="99999999999")
+            {
+                Console.WriteLine("CPF inválido!");
+                return 0;
+            }
+
             if(tipoCliente==1){
                 tipoDoc = "CPF";
                 chave1  = chaveCPF;
@@ -176,7 +181,7 @@ namespace sistema_vendas
             else{
                 tipoDoc = "CNPJ";
                 chave1 = chaveCNPJ;
-                chave2 = chaveCNPJ;
+                chave2 = chaveCNPJ2;
             }
 
             primeiroDigito = ValidaDigito(docCliente,chave1,tipoCliente);
@@ -198,17 +203,18 @@ namespace sistema_vendas
                 Console.WriteLine(tipoDoc+" inválido!");
             }
             }
-        return 0;
+            return 0;
         }
+
 
         private static string ValidaDigito(string doc, int[] chave, int tipoDoc)
         {
-       int soma = 0, resto = 0;
-       string tempdoc;
-       tempdoc = doc.Substring(0,chave.Length);
-       for(int i=0;i<chave.Length;i++){
-                soma += Convert.ToInt16(tempdoc[i].ToString())*chave[i];
-        }
+            int soma = 0, resto = 0;
+            string tempdoc;
+            tempdoc = doc.Substring(0,chave.Length);
+            for(int i=0;i<chave.Length;i++){
+                    soma += Convert.ToInt16(tempdoc[i].ToString())*chave[i];
+            }
             resto = soma % 11;
             
             if(resto<2)
@@ -224,7 +230,7 @@ namespace sistema_vendas
                 return (11-resto).ToString();
             }
 
-    }
+        }
 
         private static void CadastrarProdutos()
         {
@@ -283,18 +289,26 @@ namespace sistema_vendas
                         do{
                             Console.Write("CPF: ");
                             docCliente = Console.ReadLine();
-                            duplicado = PesquisaDocumento(docCliente);    
+                            duplicado = PesquisaDocumento(docCliente); 
+                            
+                            if(docCliente.Length!=11){
+                                Console.WriteLine("Formato de CPF inválido!");
+                            }
+
                         }while(docCliente.Length!=11 || duplicado!=0);
-                        Console.WriteLine(docCliente);
                         valid = ValidarDocumento(docCliente, 1);
-                        Console.WriteLine(valid);
                     }
                     else{
                         do{
                             Console.Write("CNPJ: ");
                             docCliente = Console.ReadLine();    
-                            duplicado = PesquisaDocumento(docCliente);    
-                        }while(docCliente.Length!=11 || duplicado!=0);
+                            duplicado = PesquisaDocumento(docCliente); 
+
+                            if(docCliente.Length!=14){
+                                Console.WriteLine("Formato de CNPJ inválido!");
+                            }
+
+                        }while(docCliente.Length!=14 || duplicado!=0);
                         valid = ValidarDocumento(docCliente, 2);
                     }
                 }while(valid!=1);
